@@ -2,9 +2,16 @@
 02_supervised_baseline.py
 Supervised ML baselines for Full-vs-rest under family-grouped 5-fold CV.
 
-Models: Logistic Regression, Random Forest, XGBoost (all full-data, all features),
-plus TabNet and TabPFN if their packages are installed. Also computes the k-shot
-supervised curve (LogReg trained on prevalence-sampled k-shot subsets, k=0..64).
+Models, each fit within training folds only:
+  - Plain full-data (all 64 features): Logistic Regression, Random Forest, XGBoost.
+    These reproduce the manuscript Table 1 rows (LR 0.591, RF 0.648, XGBoost 0.641-0.665
+    depending on seed).
+  - Tuned variants (SMOTE oversampling + SelectKBest(k=20), guarded on imbalanced-learn):
+    reproduce the tuned figures reported in the text (LR/RF ~0.656-0.657).
+  - TabNet and TabPFN are included when their packages are installed (guarded try/except);
+    otherwise skipped with a message.
+Also computes the k-shot supervised curve (LogReg trained on prevalence-sampled k-shot
+subsets, k=0..64).
 
 Metrics pooled across held-out folds. Writes results/baselines.csv and
 results/ml_kshot_curve.csv.
@@ -56,6 +63,24 @@ def xgb_fp(Xtr, ytr, Xte):
                         eval_metric="logloss", random_state=SEED).fit(Xtr, ytr)
     return clf.predict_proba(Xte)[:, 1]
 
+def _tuned_fp(base):
+    """Wrap a base estimator in SMOTE + SelectKBest(k=20), fit in-fold. Reproduces the
+    tuned LR/RF figures (~0.657/0.656) reported in the manuscript text. Requires
+    imbalanced-learn; if unavailable the caller skips it."""
+    def fp(Xtr, ytr, Xte):
+        from imblearn.over_sampling import SMOTE
+        from imblearn.pipeline import Pipeline as ImbPipeline
+        from sklearn.feature_selection import SelectKBest, f_classif
+        k = min(20, Xtr.shape[1])
+        pipe = ImbPipeline([
+            ("scale", StandardScaler()),
+            ("select", SelectKBest(f_classif, k=k)),
+            ("smote", SMOTE(random_state=SEED, k_neighbors=5)),
+            ("clf", base),
+        ]).fit(Xtr, ytr)
+        return pipe.predict_proba(Xte)[:, 1]
+    return fp
+
 def kshot_curve(X, lab3, folds, prev, Kvals=(0,2,4,8,16,32,64), n_seeds=5):
     def prevalence_shots(train_idx, K, seed):
         if K == 0: return []
@@ -101,6 +126,16 @@ def main():
             res[name] = (roc_auc_score(y, p), average_precision_score(y, p))
         except Exception as e:
             print(f"skip {name}: {e}")
+    # Tuned variants (SMOTE + SelectKBest k=20); guarded on imbalanced-learn
+    try:
+        import imblearn  # noqa: F401
+        for name, base in [
+            ("Logistic Regression (tuned)", LogisticRegression(max_iter=5000, class_weight="balanced")),
+            ("Random Forest (tuned)", RandomForestClassifier(n_estimators=400, class_weight="balanced", random_state=SEED))]:
+            p = oof(_tuned_fp(base), X, y, lab3, folds)
+            res[name] = (roc_auc_score(y, p), average_precision_score(y, p))
+    except ImportError:
+        print("skip tuned variants: imbalanced-learn not installed")
     # Optional TabNet / TabPFN (only if installed)
     try:
         from pytorch_tabnet.tab_model import TabNetClassifier
@@ -115,6 +150,17 @@ def main():
         res["TabNet"] = (roc_auc_score(y, p), average_precision_score(y, p))
     except Exception as e:
         print(f"skip TabNet: {e}")
+    # Optional TabPFN (only if installed). Requires model weights; see tabpfn docs.
+    try:
+        from tabpfn import TabPFNClassifier
+        def tabpfn_fp(Xtr, ytr, Xte):
+            clf = TabPFNClassifier(ignore_pretraining_limits=True)
+            clf.fit(Xtr, ytr)
+            return clf.predict_proba(Xte)[:, 1]
+        p = oof(tabpfn_fp, X, y, lab3, folds)
+        res["TabPFN v2"] = (roc_auc_score(y, p), average_precision_score(y, p))
+    except Exception as e:
+        print(f"skip TabPFN: {e}")
     out = pd.DataFrame([{"Model": k, "AUROC": round(v[0], 3), "AUPRC": round(v[1], 3)}
                         for k, v in res.items()]).sort_values("AUROC", ascending=False)
     os.makedirs("results", exist_ok=True)
