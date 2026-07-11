@@ -83,3 +83,9 @@ results/                        baselines.csv, fewshot_*.json, figure (generated
 - Clinician-panel and MentalBERT text-model baselines are part of the study design but
   are collected/added separately.
 - The raw clinical data are not included in this repository (human-subjects data).
+
+## Prompt & exemplar specification
+
+The exact system prompt, structured-output tool schema, exemplar format, and
+prevalence-based sampling are documented verbatim in
+[APPENDIX_prompt_and_exemplars.md](APPENDIX_prompt_and_exemplars.md).
