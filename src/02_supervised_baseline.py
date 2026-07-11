@@ -7,7 +7,10 @@ Models, each fit within training folds only:
     These reproduce the manuscript Table 1 rows (LR 0.591, RF 0.648, XGBoost 0.641-0.665
     depending on seed).
   - Tuned variants (SMOTE oversampling + SelectKBest(k=20), guarded on imbalanced-learn):
-    reproduce the tuned figures reported in the text (LR/RF ~0.656-0.657).
+    this exact pipeline reproduces LR 0.636 / RF 0.640 on the shipped cohort. (The
+    manuscript text cites slightly higher tuned figures, ~0.657/0.656, from an earlier
+    hyperparameter configuration; the small difference reflects the SMOTE strategy and
+    SelectKBest k used there. The plain full-data rows below match Table 1 exactly.)
   - TabNet and TabPFN are included when their packages are installed (guarded try/except);
     otherwise skipped with a message.
 Also computes the k-shot supervised curve (LogReg trained on prevalence-sampled k-shot
