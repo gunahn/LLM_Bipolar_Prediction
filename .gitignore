@@ -1,0 +1,16 @@
+# raw human-subjects data — never commit
+data/*.xlsx
+data/*.csv
+data/cohort.csv
+data/features.json
+handoff/
+
+# generated results (regenerate via the pipeline)
+results/*.json
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.env
+.ipynb_checkpoints/
