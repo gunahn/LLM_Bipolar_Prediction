@@ -35,8 +35,6 @@ SYSTEM = (
 "  - None: no bipolar features develop\n"
 "  - Subthreshold: subthreshold bipolar features develop\n"
 "  - Full: full bipolar disorder develops\n\n"
-"In this depressed-adolescent population the base rates are approximately: None 72%, Subthreshold 9%, "
-"Full 19%. Roughly one in five converts to full bipolar disorder.\n\n"
 "Clinical reference for interpreting the narratives:\n"
 "- CBCL problem T-scores: T>=65 borderline, T>=70 clinical range (higher = more pathology).\n"
 "- CBCL competence T-scores: T<=35 borderline-low, T<=30 clinical deficit (lower = worse).\n"
