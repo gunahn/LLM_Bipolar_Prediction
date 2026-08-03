@@ -72,9 +72,28 @@ src/serialize.py                feature-row -> clinical narrative (shared module
 src/02_supervised_baseline.py   LR/RF/XGBoost/TabNet + ML k-shot curve
 src/03_fewshot_llm.py           few-shot LLM sweep (all / top10 modes)
 src/04_analyze_and_figure.py    aggregation, k-sweep table, 3-panel figure
+src/models/                     other model baselines (TabFM, MentalRoBERTa,
+                                MentaLLaMA-7B, Gemini) — see src/models/README.md
+src/supplementary/              supplementary analyses + Fig 2/3 & Fig S2
+                                (demographics, feature importance, prompt
+                                comparison, imbalance grid, LLM-vs-ML
+                                significance, clinician benchmark) —
+                                see src/supplementary/README.md
 data/                           cohort.csv, features.json (generated)
-results/                        baselines.csv, fewshot_*.json, figure (generated)
+results/                        baselines.csv, fewshot_*.json, metrics, figures (generated)
+results/figures/                all manuscript figures (Fig 1-3, Fig S1-S2)
 ```
+
+## Additional baselines and supplementary analyses
+
+Beyond the core pipeline above, `src/models/` holds the standalone scripts for the
+TabFM, MentalRoBERTa, MentaLLaMA-7B, and Gemini baselines, and `src/supplementary/`
+reproduces every supplementary result and the two model-agnostic main figures
+(demographics table, feature-importance forest plot, minimal-vs-clinician prompt
+comparison with the 5-seed paired t-test, the supervised × imbalance grid, the
+LLM-vs-ML family-clustered significance test, and the clinician human-expert
+benchmark). Bootstrap replicate counts are unified at 2,000 throughout. See the
+`README.md` in each of those folders for inputs, outputs, and hardware notes.
 
 ## Notes / caveats
 

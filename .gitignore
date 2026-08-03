@@ -14,3 +14,10 @@ __pycache__/
 .venv/
 .env
 .ipynb_checkpoints/
+
+# human-subjects clinician-panel data & derived narratives
+data/clinician_baseline_predictions.csv
+data/clinician_baseline_metrics.csv
+data/narratives.json
+data/feat_desc.json
+results/ml_matrix_n141.npz
